@@ -20,7 +20,19 @@ It lets AI coding/reversing agents (Claude Code, Antigravity / Gemini, Cursor, V
 
 ## Installation
 
-Clone the repository and install in editable mode (or run directly via `PYTHONPATH=src`):
+Install directly from GitHub Releases (no clone needed):
+
+```bash
+pip install https://github.com/renan-marcel/ps5debug-mcp/releases/latest/download/ps5debug_mcp-0.1.0-py3-none-any.whl
+```
+
+Or install directly via Git:
+
+```bash
+pip install git+https://github.com/renan-marcel/ps5debug-mcp.git
+```
+
+Or clone for local development:
 
 ```bash
 git clone https://github.com/renan-marcel/ps5debug-mcp.git
