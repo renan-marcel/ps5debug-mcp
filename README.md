@@ -2,7 +2,7 @@
 
 A **zero-dependency** Model Context Protocol (MCP) server for [`ps5debug-NG`](https://github.com/Pharaoh2k/ps5debug-NG), built on top of the pure-Python protocol layer from [`PS5Debug-studio`](https://github.com/Pharaoh2k/PS5Debug-studio).
 
-It lets AI coding/reversing agents (Claude Code, Antigravity / Gemini, Cursor, VS Code, Windsurf) inspect processes, resolve ASLR module bases, read/write live PS5 memory, scan AOB patterns, set hardware watchpoints / software breakpoints, walk call stacks, and tail `/dev/klog` — and pairs directly with **Binary Ninja MCP** for closed-loop static + dynamic analysis of `eboot.bin`.
+It lets AI coding/reversing agents (Claude Code, Antigravity / Gemini, Cursor, VS Code, Windsurf) inspect processes, resolve ASLR module bases, read/write live PS5 memory, scan AOB patterns, disassemble with Zydis, set hardware watchpoints / software breakpoints, walk call stacks, and tail `/dev/klog` — completely standalone with no external disassembler required (and optionally pairs with **Binary Ninja MCP** if you want static ELF decompilation alongside it).
 
 ## Features
 

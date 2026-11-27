@@ -247,15 +247,16 @@ class MCPServer:
             },
             {
                 "name": "ps5_resolve_address",
-                "description": "Translate between a Binary Ninja / ELF address (given bn_base) and live PS5 ASLR address for a module (default eboot.bin).",
+                "description": "Translate between a relative/ELF address (given image_base/bn_base) and live PS5 ASLR address for a module (default eboot.bin). Works standalone or with any disassembler.",
                 "inputSchema": {
                     "type": "object",
                     "properties": {
                         "pid": {"type": "integer"},
                         "address": {"type": "string", "description": "Hex or int address to translate"},
                         "module": {"type": "string", "default": "eboot.bin"},
-                        "bn_base": {"type": "string", "default": "0x0", "description": "Module image base in Binary Ninja (e.g. 0x0 or 0x400000)"},
-                        "direction": {"type": "string", "enum": ["bn_to_ps5", "ps5_to_bn"], "default": "bn_to_ps5"},
+                        "image_base": {"type": "string", "default": "0x0", "description": "Static ELF/disassembler image base (e.g. 0x0 or 0x400000)"},
+                        "bn_base": {"type": "string", "default": "0x0", "description": "Alias for image_base (e.g. Binary Ninja base)"},
+                        "direction": {"type": "string", "enum": ["elf_to_ps5", "ps5_to_elf", "bn_to_ps5", "ps5_to_bn"], "default": "elf_to_ps5"},
                     },
                     "required": ["address"],
                 },
@@ -542,22 +543,22 @@ class MCPServer:
         if name == "ps5_resolve_address":
             pid = s.resolve_pid(args.get("pid"))
             module = args.get("module", "eboot.bin")
-            bn_base = parse_int(args.get("bn_base", "0x0"))
+            image_base = parse_int(args.get("image_base", args.get("bn_base", "0x0")))
             addr = parse_int(args["address"])
             mod = s.module_base(pid, module)
             ps5_base = int(mod["base"], 16)
-            direction = args.get("direction", "bn_to_ps5")
-            if direction == "bn_to_ps5":
-                offset = addr - bn_base
+            direction = args.get("direction", "elf_to_ps5")
+            if direction in ("elf_to_ps5", "bn_to_ps5"):
+                offset = addr - image_base
                 translated = ps5_base + offset
             else:
                 offset = addr - ps5_base
-                translated = bn_base + offset
+                translated = image_base + offset
             return {
                 "direction": direction,
                 "module": module,
                 "ps5_base": hex(ps5_base),
-                "bn_base": hex(bn_base),
+                "image_base": hex(image_base),
                 "offset": hex(offset),
                 "input": hex(addr),
                 "output": hex(translated),
