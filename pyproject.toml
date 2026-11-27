@@ -1,0 +1,31 @@
+[build-system]
+requires = ["setuptools>=68.0"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "ps5debug-mcp"
+version = "0.1.0"
+description = "Zero-dependency MCP server for ps5debug-NG (PlayStation 5 runtime debugger & memory inspector)"
+readme = "README.md"
+license = { text = "Apache-2.0" }
+requires-python = ">=3.10"
+authors = [
+    { name = "renan-marcel" }
+]
+keywords = ["ps5", "ps5debug", "mcp", "debugger", "reverse-engineering", "binary-ninja"]
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "Intended Audience :: Developers",
+    "License :: OSI Approved :: Apache Software License",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+]
+dependencies = []
+
+[project.scripts]
+ps5debug-mcp = "ps5debug_mcp.server:main"
+
+[tool.setuptools.packages.find]
+where = ["src"]
