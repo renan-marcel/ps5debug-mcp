@@ -498,6 +498,22 @@ class MCPServer:
                 "klog_error": s.klog.last_error,
             }
 
+        if name == "ps5_klog_start":
+            host = args.get("host") or s.host or os.environ.get("PS5_DEBUG_HOST")
+            if not host:
+                raise ValueError("Provide 'host' or connect first")
+            port = int(args.get("port", KLOG_PORT))
+            s.klog.start(host, port=port)
+            return {"klog_running": True, "host": host, "port": port}
+
+        if name == "ps5_klog_stop":
+            s.klog.stop()
+            return {"klog_running": False}
+
+        if name == "ps5_klog_tail":
+            lines = s.klog.tail(count=int(args.get("lines", 50)), filter_text=args.get("filter_text"))
+            return {"count": len(lines), "lines": lines}
+
         c = s.require_client()
 
         if name == "ps5_list_processes":
@@ -698,22 +714,6 @@ class MCPServer:
                 {"rbp": hex(fr.rbp), "rsp": hex(fr.rsp), "saved_rbp": hex(fr.saved_rbp), "ret_addr": hex(fr.ret_addr), "flags": fr.flags}
                 for fr in frames
             ]
-
-        if name == "ps5_klog_start":
-            host = args.get("host") or s.host or os.environ.get("PS5_DEBUG_HOST")
-            if not host:
-                raise ValueError("Provide 'host' or connect first")
-            port = int(args.get("port", KLOG_PORT))
-            s.klog.start(host, port=port)
-            return {"klog_running": True, "host": host, "port": port}
-
-        if name == "ps5_klog_stop":
-            s.klog.stop()
-            return {"klog_running": False}
-
-        if name == "ps5_klog_tail":
-            lines = s.klog.tail(count=int(args.get("lines", 50)), filter_text=args.get("filter_text"))
-            return {"count": len(lines), "lines": lines}
 
         raise KeyError(f"Unknown tool: {name}")
 
