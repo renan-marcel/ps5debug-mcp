@@ -75,7 +75,13 @@ Point the MCP `stdio` entry to `ps5debug-mcp` (if installed via `pip install -e 
 ## Documentation
 
 - [Tools Reference](docs/TOOLS.md) — Every MCP tool, argument, and return payload.
-- [Binary Ninja + PS5 Workflow](docs/BINARY_NINJA_WORKFLOW.md) — How to combine `binary-ninja` MCP and `ps5debug-mcp` to debug `eboot.bin` / `llvm-pie.elf`.
+- [Binary Ninja + PS5 Workflow](docs/BINARY_NINJA_WORKFLOW.md) — Optional guide for combining `binary-ninja` MCP and `ps5debug-mcp`.
+
+## GitFlow & Automated Releases
+
+- **`main` (protected):** Production/release branch. Direct pushes are blocked; changes enter via Pull Request after all CI checks (`Python 3.10–3.13`) pass.
+- **`develop`:** Integration branch for `feature/*` and `fix/*` branches.
+- **Auto Tag & Release:** Every merge/PR into `main` automatically computes the next semantic version tag from Conventional Commits (`feat!:` → major, `feat:` → minor, `fix:`/`chore:`/`ci:` → patch), pushes the `vX.Y.Z` tag, builds `.whl` and `.tar.gz`, and publishes a GitHub Release.
 
 ## License & Attribution
 
