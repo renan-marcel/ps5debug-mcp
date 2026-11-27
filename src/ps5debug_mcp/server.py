@@ -164,6 +164,12 @@ class DebugSession:
         maps = c.maps(pid)
         needle = module.lower()
         matches = [m for m in maps if needle in m.name.lower()]
+        # On PS5, the main eboot.bin code/data segments are often named "executable"
+        # while "(NoName)eboot.bin" is a non-executable guard/metadata entry.
+        if needle == "eboot.bin" and not any(m.prot & PROT_EXEC for m in matches):
+            exec_matches = [m for m in maps if m.name == "executable"]
+            if exec_matches:
+                matches = exec_matches
         if not matches:
             raise RuntimeError(f"Module {module!r} not found in maps for pid {pid}")
         base = min(m.start for m in matches)
@@ -236,12 +242,14 @@ class MCPServer:
             },
             {
                 "name": "ps5_proc_maps",
-                "description": "List virtual memory maps for a process (optional substring filter on segment name).",
+                "description": "List virtual memory maps for a process (optional substring filter on segment name, prot filter, and limit).",
                 "inputSchema": {
                     "type": "object",
                     "properties": {
                         "pid": {"type": "integer"},
                         "filter_name": {"type": "string"},
+                        "prot": {"type": "string", "description": "Optional substring filter on protection (e.g. 'x', 'rw')"},
+                        "limit": {"type": "integer", "default": 200},
                     },
                 },
             },
@@ -532,9 +540,15 @@ class MCPServer:
         if name == "ps5_proc_maps":
             pid = s.resolve_pid(args.get("pid"))
             filt = (args.get("filter_name") or "").lower()
+            pfilt = (args.get("prot") or "").lower()
+            limit = int(args.get("limit", 200))
             maps = c.maps(pid)
             if filt:
                 maps = [m for m in maps if filt in m.name.lower()]
+            if pfilt:
+                maps = [m for m in maps if pfilt in prot_str(m.prot)]
+            if limit > 0:
+                maps = maps[:limit]
             return [
                 {"name": m.name, "start": hex(m.start), "end": hex(m.end), "size": m.end - m.start, "offset": hex(m.offset), "prot": prot_str(m.prot)}
                 for m in maps
@@ -598,7 +612,7 @@ class MCPServer:
                 mod = s.module_base(pid, args.get("module", "eboot.bin"))
                 start = int(mod["base"], 16)
                 length = int(mod["size"])
-            hits = c.scan_aob_all(pid, start, length, pat, mask, max_results=int(args.get("max_results", 32)))
+            hits = c.scan_aob_all(pid, start, length, pat, mask, limit=int(args.get("max_results", 32)))
             return {"count": len(hits), "addresses": [hex(a) for a in hits]}
 
         if name == "ps5_disasm_region":
@@ -612,7 +626,7 @@ class MCPServer:
                     "length": i.length,
                     "rip_rel_target": hex(i.rip_rel_target) if i.rip_rel_target else None,
                     "mem_disp": hex(i.mem_disp) if i.mem_disp else None,
-                    "flags": i.flags,
+                    "kind": i.kind,
                 }
                 for i in insns
             ]

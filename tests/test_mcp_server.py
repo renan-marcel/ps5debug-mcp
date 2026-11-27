@@ -58,11 +58,11 @@ class FakeClient:
         off = address - 0x700000000
         self.mem[off : off + len(data)] = data
 
-    def scan_aob_all(self, pid, addr, length, pat, mask, max_results=32):
+    def scan_aob_all(self, pid, addr, length, pat, mask, limit=32):
         return [0x700000100]
 
     def disasm_region(self, pid, addr, length):
-        return [DisasmEntry(addr, 0, 0, 5, 0)]
+        return [DisasmEntry(addr, 0, 0, 5, 0x01, 0, 0, 0, 0)]
 
     def find_xrefs_to(self, pid, start, length, target):
         return [0x700000050]
